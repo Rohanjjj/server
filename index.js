@@ -1,18 +1,18 @@
 const express = require('express');
 const app = express();
 
-// Middleware to parse JSON
+// Middleware to parse JSON data
 app.use(express.json());
 
-// Correct endpoint for POST
-app.post('/endpoint', (req, res) => {
-    const data = req.body;
+// Handle POST requests at the root path "/"
+app.post('/', (req, res) => {
+    const data = req.body; // Retrieve the JSON data
     console.log('Received data:', data);
-    res.json({ status: 'Success', receivedData: data });
+    res.json({ status: 'Success', receivedData: data }); // Respond to the request
 });
 
 // Start the server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5000; // Use the provided PORT or default to 5000
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
