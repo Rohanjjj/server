@@ -22,8 +22,32 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
         return "Stop";
     } else if (flex1 < 800 && flex2 < 770 && flex3 < 850 && flex4 < 770) {
         return "Thank You";
+    } else if (flex1 > 820 && flex2 > 830 && flex3 > 860 && flex4 < 810) {
+        return "Good Morning";
+    } else if (flex1 < 790 && flex2 < 780 && flex3 < 810 && flex4 < 780) {
+        return "Good Night";
+    } else if (flex1 > 870 && flex2 > 850 && flex3 < 800 && flex4 > 860) {
+        return "I Love You";
+    } else if (flex1 < 750 && flex2 > 810 && flex3 < 830 && flex4 > 820) {
+        return "Sorry";
+    } else if (flex1 > 880 && flex2 < 790 && flex3 > 860 && flex4 > 870) {
+        return "Please";
+    } else if (flex1 > 830 && flex2 < 800 && flex3 > 840 && flex4 < 820) {
+        return "Help";
+    } else if (flex1 < 770 && flex2 > 850 && flex3 > 870 && flex4 > 840) {
+        return "Welcome";
+    } else if (flex1 > 860 && flex2 < 780 && flex3 > 850 && flex4 < 810) {
+        return "Water";
+    } else if (flex1 < 780 && flex2 > 800 && flex3 < 810 && flex4 < 780) {
+        return "Food";
+    } else if (flex1 > 850 && flex2 > 860 && flex3 < 780 && flex4 > 870) {
+        return "Goodbye";
+    } else if (flex1 < 750 && flex2 < 760 && flex3 > 830 && flex4 > 850) {
+        return "Congratulations";
     } else {
-        return "I am Rohan";
+        const gestures = 'abcdefghijklmnopqrstuvwxyz';
+        const index = Math.floor((flex1 + flex2 + flex3 + flex4) / 160) % 26;
+        return `Letter: ${gestures[index]}`;
     }
 }
 
