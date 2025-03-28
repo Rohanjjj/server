@@ -24,7 +24,8 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
 // API Endpoint for Prediction
 app.post('/', async (req, res) => {
     try {
-        const { flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz } = req.body;
+        const sensorData = JSON.parse(req.body);
+        const { flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz } = sensorData;
 
         // Input Validation
         if ([flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz].some(value => value === undefined)) {
