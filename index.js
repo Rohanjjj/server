@@ -4,6 +4,12 @@ const app = express();
 
 app.use(express.json());
 
+// Debugging Middleware to log received requests
+app.use((req, res, next) => {
+    console.log("Received Body:", JSON.stringify(req.body));
+    next();
+});
+
 // Gesture Mapping Function
 function mapToGesture(flex1, flex2, flex3, flex4) {
     if (flex1 > 840 && flex2 > 810 && flex3 > 870 && flex4 > 815) {
@@ -25,6 +31,7 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
 app.post('/', async (req, res) => {
     try {
         if (!req.body || !req.body.sensorData) {
+            console.error("Invalid request: Missing sensorData object");
             return res.status(400).json({ error: "Missing sensorData object" });
         }
 
@@ -32,6 +39,7 @@ app.post('/', async (req, res) => {
 
         // Input Validation
         if ([flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz].some(value => value === undefined)) {
+            console.error("Invalid sensor data received");
             return res.status(400).json({ error: "Missing or invalid sensor data" });
         }
 
@@ -42,11 +50,14 @@ app.post('/', async (req, res) => {
         const externalURL = 'https://vser.onrender.com';
         const dataToSend = { gesture, ax, ay, az, gx, gy, gz };
 
-        await axios.post(externalURL, dataToSend, {
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-        console.log(`Gesture and sensor data sent to external site: ${gesture}`);
+        try {
+            await axios.post(externalURL, dataToSend, {
+                headers: { 'Content-Type': 'application/json' }
+            });
+            console.log(`Gesture and sensor data sent to external site: ${gesture}`);
+        } catch (axiosError) {
+            console.error("Failed to send data to external site:", axiosError.message);
+        }
 
         // Send response back to ESP32
         res.send(gesture);
