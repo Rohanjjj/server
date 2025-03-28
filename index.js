@@ -1,13 +1,13 @@
 const express = require('express');
+const axios = require('axios');
 const app = express();
 
 // Middleware to parse JSON data
 app.use(express.json());
 
 // Handle POST requests at the root path "/"
-app.post('/', (req, res) => {
+app.post('/', async (req, res) => {
     try {
-        // Check if sensorData exists and is valid JSON
         if (req.body.sensorData) {
             let sensorData;
 
@@ -25,8 +25,19 @@ app.post('/', (req, res) => {
 
             console.log('Received Data:', sensorData);
 
-            // Forwarding the data to another endpoint if needed
-            res.json({ status: 'Success', receivedData: sensorData });
+            // Prepare the data for ML model input
+            const inputData = {
+                flex1: sensorData.flex1,
+                flex2: sensorData.flex2,
+                flex3: sensorData.flex3,
+                flex4: sensorData.flex4
+            };
+
+            // Send data to the ML model running on Flask
+            const modelResponse = await axios.post('http://localhost:5000/predict', inputData);
+
+            // Return prediction response from the ML model
+            res.json({ status: 'Success', prediction: modelResponse.data.prediction });
         } else {
             res.status(400).json({ status: 'Error', message: 'Missing sensorData field' });
         }
