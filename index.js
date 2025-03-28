@@ -1,54 +1,46 @@
 const express = require('express');
-const axios = require('axios');
 const app = express();
 
-// Middleware to parse JSON data
 app.use(express.json());
 
-// Handle POST requests at the root path "/"
-app.post('/', async (req, res) => {
+// Gesture Mapping Function
+function mapToGesture(flex1, flex2, flex3, flex4) {
+    if (flex1 > 840 && flex2 > 810 && flex3 > 870 && flex4 > 815) {
+        return "Hello";
+    } else if (flex1 < 810 && flex2 < 800 && flex3 > 850 && flex4 < 800) {
+        return "Yes";
+    } else if (flex1 < 810 && flex2 < 770 && flex3 < 850 && flex4 < 770) {
+        return "No";
+    } else if (flex1 > 850 && flex2 < 820 && flex3 > 870 && flex4 < 800) {
+        return "Stop";
+    } else if (flex1 < 800 && flex2 < 770 && flex3 < 850 && flex4 < 770) {
+        return "Thank You";
+    } else {
+        return "I am Rohan ";
+    }
+}
+
+// API Endpoint for Prediction
+app.post('/predict', (req, res) => {
     try {
-        if (req.body.sensorData) {
-            let sensorData;
+        const { flex1, flex2, flex3, flex4 } = req.body;
 
-            // Parse sensorData if it's in string format
-            if (typeof req.body.sensorData === 'string') {
-                try {
-                    sensorData = JSON.parse(req.body.sensorData);
-                } catch (error) {
-                    console.error('Invalid JSON in sensorData:', error);
-                    return res.status(400).json({ status: 'Error', message: 'Invalid JSON in sensorData' });
-                }
-            } else {
-                sensorData = req.body.sensorData;
-            }
-
-            console.log('Received Data:', sensorData);
-
-            // Prepare the data for ML model input
-            const inputData = {
-                flex1: sensorData.flex1,
-                flex2: sensorData.flex2,
-                flex3: sensorData.flex3,
-                flex4: sensorData.flex4
-            };
-
-            // Send data to the ML model running on Flask
-            const modelResponse = await axios.post('http://localhost:5000', inputData);
-
-            // Return prediction response from the ML model
-            res.json({ status: 'Success', prediction: modelResponse.data.prediction });
-        } else {
-            res.status(400).json({ status: 'Error', message: 'Missing sensorData field' });
+        // Input Validation
+        if ([flex1, flex2, flex3, flex4].some(value => value === undefined)) {
+            return res.status(400).json({ error: "Missing or invalid sensor data" });
         }
+
+        // Map to Gesture
+        const gesture = mapToGesture(flex1, flex2, flex3, flex4);
+        res.json({ gesture });
     } catch (error) {
-        console.error('Error processing request:', error);
-        res.status(500).json({ status: 'Error', message: 'Internal Server Error' });
+        console.error("Error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
-// Start the server
-const PORT = process.env.PORT || 5000;
+// Start the Server
+const PORT = 5000;
 app.listen(PORT, () => {
-    console.log(Server is running on port ${PORT});
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
