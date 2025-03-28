@@ -1,26 +1,32 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
 import pickle
+import sys
+import json
 
-# Load the dataset
-df = pd.read_csv('sign_language_subset.csv')
-
-# Define features (input columns) and target (output column)
-features = ['Thumb', 'Index', 'Middle', 'Ring', 'Little']
-target = 'Gesture'
-
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(df[features], df[target], test_size=0.2, random_state=42)
-
-# Create a Random Forest Classifier model
-model = RandomForestClassifier(n_estimators=100, random_state=42)
-
-# Train the model
-model.fit(X_train, y_train)
-
-# Save the model to a file
+# Load the model
 filename = 'sign_language_model.pkl'
-pickle.dump(model, open(filename, 'wb'))
+with open(filename, 'rb') as f:
+    model = pickle.load(f)
 
-print(f"Model saved to {filename}")
+# Read input from stdin (from the Express server)
+def predict_from_input():
+    try:
+        # Read and parse the input data from stdin
+        input_data = json.loads(sys.stdin.read())
+        
+        # Convert input to DataFrame
+        input_df = pd.DataFrame([input_data])
+
+        # Ensure correct columns
+        expected_cols = ['flex1', 'flex2', 'flex3', 'flex4']
+        input_df = input_df[expected_cols]
+
+        # Predict using the model
+        prediction = model.predict(input_df)
+        print(prediction[0])  # Return only the first prediction
+    except Exception as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+if __name__ == "__main__":
+    predict_from_input()
