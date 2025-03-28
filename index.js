@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 const app = express();
 
 app.use(express.json());
@@ -16,22 +17,28 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
     } else if (flex1 < 800 && flex2 < 770 && flex3 < 850 && flex4 < 770) {
         return "Thank You";
     } else {
-        return "I am Rohan ";
+        return "I am Rohan";
     }
 }
 
 // API Endpoint for Prediction
-app.post('/predict', (req, res) => {
+app.post('/predict', async (req, res) => {
     try {
-        const { flex1, flex2, flex3, flex4 } = req.body;
+        const { flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz } = req.body;
 
         // Input Validation
-        if ([flex1, flex2, flex3, flex4].some(value => value === undefined)) {
+        if ([flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz].some(value => value === undefined)) {
             return res.status(400).json({ error: "Missing or invalid sensor data" });
         }
 
         // Map to Gesture
         const gesture = mapToGesture(flex1, flex2, flex3, flex4);
+
+        // Forward result to external website
+        const externalURL = 'http://example.com/result';
+        await axios.post(externalURL, { gesture, ax, ay, az, gx, gy, gz });
+        console.log(`Gesture and sensor data sent to external site: ${gesture}`);
+
         res.json({ gesture });
     } catch (error) {
         console.error("Error:", error);
