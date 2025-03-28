@@ -35,10 +35,14 @@ app.post('/predict', async (req, res) => {
         const gesture = mapToGesture(flex1, flex2, flex3, flex4);
 
         // Forward result to external website
-        const externalURL = 'http://example.com/result';
-        await axios.post(externalURL, { gesture, ax, ay, az, gx, gy, gz });
-        console.log(`Gesture and sensor data sent to external site: ${gesture}`);
+        const externalURL = 'https://vser.onrender.com';
+        const dataToSend = JSON.stringify({ gesture, ax, ay, az, gx, gy, gz });
 
+        await axios.post(externalURL, dataToSend, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        console.log(`Gesture and sensor data sent to external site: ${gesture}`);
         res.json({ gesture });
     } catch (error) {
         console.error("Error:", error);
