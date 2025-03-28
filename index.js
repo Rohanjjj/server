@@ -1,44 +1,43 @@
 const express = require('express');
-const { spawn } = require('child_process');
+const axios = require('axios');
 const app = express();
 
+// Middleware to parse JSON data
 app.use(express.json());
 
+// Handle POST requests at the root path "/"
 app.post('/', async (req, res) => {
     try {
         if (req.body.sensorData) {
-            const sensorData = req.body.sensorData;
+            let sensorData;
+
+            // Parse sensorData if it's in string format
+            if (typeof req.body.sensorData === 'string') {
+                try {
+                    sensorData = JSON.parse(req.body.sensorData);
+                } catch (error) {
+                    console.error('Invalid JSON in sensorData:', error);
+                    return res.status(400).json({ status: 'Error', message: 'Invalid JSON in sensorData' });
+                }
+            } else {
+                sensorData = req.body.sensorData;
+            }
 
             console.log('Received Data:', sensorData);
 
-            // Spawn a Python process to run the model.py with input data
-            const pythonProcess = spawn('python', ['model.py', JSON.stringify(sensorData)]);
+            // Prepare the data for ML model input
+            const inputData = {
+                flex1: sensorData.flex1,
+                flex2: sensorData.flex2,
+                flex3: sensorData.flex3,
+                flex4: sensorData.flex4
+            };
 
-            let prediction = '';
+            // Send data to the ML model running on Flask
+            const modelResponse = await axios.post('http://localhost:5000/predict', inputData);
 
-            // Capture data from the Python script
-            pythonProcess.stdout.on('data', (data) => {
-                prediction += data.toString();
-            });
-
-            // Handle process close
-            pythonProcess.on('close', (code) => {
-                if (code === 0) {
-                    res.json({ status: 'Success', prediction });
-                } else {
-                    res.status(500).json({ status: 'Error', message: 'Python script error' });
-                }
-            });
-
-            // Handle Python script errors
-            pythonProcess.stderr.on('data', (data) => {
-                console.error('Python Error:', data.toString());
-                res.status(500).json({ status: 'Error', message: data.toString() });
-            });
-
-            // Send data to Python script
-            pythonProcess.stdin.write(JSON.stringify(sensorData));
-            pythonProcess.stdin.end();
+            // Return prediction response from the ML model
+            res.json({ status: 'Success', prediction: modelResponse.data.prediction });
         } else {
             res.status(400).json({ status: 'Error', message: 'Missing sensorData field' });
         }
@@ -48,7 +47,8 @@ app.post('/', async (req, res) => {
     }
 });
 
+// Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(Server is running on port ${PORT});
 });
