@@ -22,7 +22,7 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
 }
 
 // API Endpoint for Prediction
-app.post('/predict', async (req, res) => {
+app.post('/', async (req, res) => {
     try {
         const { flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz } = req.body;
 
@@ -36,17 +36,19 @@ app.post('/predict', async (req, res) => {
 
         // Forward result to external website
         const externalURL = 'https://vser.onrender.com';
-        const dataToSend = JSON.stringify({ gesture, ax, ay, az, gx, gy, gz });
+        const dataToSend = { gesture, ax, ay, az, gx, gy, gz };
 
         await axios.post(externalURL, dataToSend, {
             headers: { 'Content-Type': 'application/json' }
         });
 
         console.log(`Gesture and sensor data sent to external site: ${gesture}`);
-        res.json({ gesture });
+
+        // Send response back to ESP32
+        res.send(gesture);
     } catch (error) {
         console.error("Error:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).send("Internal Server Error");
     }
 });
 
