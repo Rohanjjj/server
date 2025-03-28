@@ -34,7 +34,7 @@ app.post('/', async (req, res) => {
             };
 
             // Send data to the ML model running on Flask
-            const modelResponse = await axios.post('http://localhost:5000/predict', inputData);
+            const modelResponse = await axios.post('http://localhost:5000', inputData);
 
             // Return prediction response from the ML model
             res.json({ status: 'Success', prediction: modelResponse.data.prediction });
