@@ -24,12 +24,11 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
 // API Endpoint for Prediction
 app.post('/', async (req, res) => {
     try {
-        const { sensorData } = req.body;
-        if (!sensorData) {
+        if (!req.body || !req.body.sensorData) {
             return res.status(400).json({ error: "Missing sensorData object" });
         }
 
-        const { flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz } = sensorData;
+        const { flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz } = req.body.sensorData;
 
         // Input Validation
         if ([flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz].some(value => value === undefined)) {
@@ -52,7 +51,7 @@ app.post('/', async (req, res) => {
         // Send response back to ESP32
         res.send(gesture);
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error:", error.message || error);
         res.status(500).send("Internal Server Error");
     }
 });
