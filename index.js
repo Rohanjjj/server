@@ -17,7 +17,7 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
     } else if (flex1 < 810 && flex2 < 800 && flex3 > 850 && flex4 < 800) {
         return "Yes";
     } else if (flex1 < 810 && flex2 < 770 && flex3 < 850 && flex4 < 770) {
-        return "Hello";
+        return "No";
     } else if (flex1 > 850 && flex2 < 820 && flex3 > 870 && flex4 < 800) {
         return "Stop";
     } else if (flex1 < 800 && flex2 < 770 && flex3 < 850 && flex4 < 770) {
@@ -70,8 +70,8 @@ app.post('/', async (req, res) => {
         // Map to Gesture
         const gesture = mapToGesture(flex1, flex2, flex3, flex4);
 
-        // Forward result to external website (Flask)
-        const externalURL = 'http://127.0.0.1:5000/data';
+        // Forward result to external website
+        const externalURL = 'https://vser.onrender.com';
         const dataToSend = { gesture, ax, ay, az, gx, gy, gz };
 
         try {
@@ -84,10 +84,10 @@ app.post('/', async (req, res) => {
         }
 
         // Send response back to ESP32
-        res.json({ gesture });
+        res.send(gesture);
     } catch (error) {
         console.error("Error:", error.message || error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).send("Internal Server Error");
     }
 });
 
