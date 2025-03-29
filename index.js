@@ -29,7 +29,7 @@ app.post('/', async (req, res) => {
         }
 
         // Forward result to external website
-        const externalURL = 'http://127.0.0.1:3000';
+        const externalURL = 'http://192.168.52.253:3000';
         const dataToSend = { flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz };
 
         try {
