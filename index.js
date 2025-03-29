@@ -1,14 +1,16 @@
 const express = require("express");
 const cors = require("cors");
+const axios = require("axios");
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3001; // Use PORT environment variable
 
 app.use(cors());
 app.use(express.json());
 
 function mapToGesture(flex1, flex2, flex3, flex4) {
-    if (flex1 > 840 && flex2 > 810 && flex3 > 870 && flex4 > 815) {
+  // Gesture mapping logic (same as before)
+  if (flex1 > 840 && flex2 > 810 && flex3 > 870 && flex4 > 815) {
         return "Hello";
     } else if (flex1 < 810 && flex2 < 800 && flex3 > 850 && flex4 < 800) {
         return "Yes";
@@ -43,11 +45,11 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
     } else {
         const gestures = 'abcdefghijklmnopqrstuvwxyz';
         const index = Math.floor((flex1 + flex2 + flex3 + flex4) / 160) % 26;
-        return `Letter: ${gestures[index]}`; // Corrected Template Literal
+        return `Letter: ${gestures[index]}`;
     }
 }
 
-app.post("/gesture", (req, res) => {
+app.post("/gesture", async (req, res) => {
     const { flex1, flex2, flex3, flex4 } = req.body;
 
     if (
@@ -60,9 +62,22 @@ app.post("/gesture", (req, res) => {
     }
 
     const gesture = mapToGesture(flex1, flex2, flex3, flex4);
-    res.json({ gesture });
+
+    // Forward to Flask backend
+    try {
+        const flaskURL = 'http://localhost:5000/data'; //Replace to correct url
+
+        await axios.post(flaskURL, { gesture }, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        res.json({ gesture }); // Respond to the frontend
+    } catch (error) {
+        console.error("Error forwarding to Flask:", error.message);
+        res.status(500).json({ error: "Failed to forward to Flask" });
+    }
 });
 
 app.listen(port, () => {
-    console.log(`Server running on port ${port}`); // Corrected Template Literal
+    console.log(`Server running on port ${port}`);
 });
