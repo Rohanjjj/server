@@ -1,12 +1,14 @@
-const express = require("express");
-const cors = require("cors");
-const axios = require("axios");
-
+const express = require('express');
+const axios = require('axios');
 const app = express();
-const port = process.env.PORT || 3001; // Use PORT environment variable
 
-app.use(cors());
 app.use(express.json());
+
+// Debugging Middleware to log received requests
+app.use((req, res, next) => {
+    console.log("Received Body:", JSON.stringify(req.body));
+    next();
+});
 
 // Gesture Mapping Function
 function mapToGesture(flex1, flex2, flex3, flex4) {
@@ -15,64 +17,82 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
     } else if (flex1 < 810 && flex2 < 800 && flex3 > 850 && flex4 < 800) {
         return "Yes";
     } else if (flex1 < 810 && flex2 < 770 && flex3 < 850 && flex4 < 770) {
-        return "No";
+        return "Hello";
     } else if (flex1 > 850 && flex2 < 820 && flex3 > 870 && flex4 < 800) {
         return "Stop";
     } else if (flex1 < 800 && flex2 < 770 && flex3 < 850 && flex4 < 770) {
         return "Thank You";
+    } else if (flex1 > 820 && flex2 > 830 && flex3 > 860 && flex4 < 810) {
+        return "Good Morning";
+    } else if (flex1 < 790 && flex2 < 780 && flex3 < 810 && flex4 < 780) {
+        return "Good Night";
+    } else if (flex1 > 870 && flex2 > 850 && flex3 < 800 && flex4 > 860) {
+        return "I Love You";
+    } else if (flex1 < 750 && flex2 > 810 && flex3 < 830 && flex4 > 820) {
+        return "Sorry";
+    } else if (flex1 > 880 && flex2 < 790 && flex3 > 860 && flex4 > 870) {
+        return "Please";
+    } else if (flex1 > 830 && flex2 < 800 && flex3 > 840 && flex4 < 820) {
+        return "Help";
+    } else if (flex1 < 770 && flex2 > 850 && flex3 > 870 && flex4 > 840) {
+        return "Welcome";
+    } else if (flex1 > 860 && flex2 < 780 && flex3 > 850 && flex4 < 810) {
+        return "Water";
+    } else if (flex1 < 780 && flex2 > 800 && flex3 < 810 && flex4 < 780) {
+        return "Food";
+    } else if (flex1 > 850 && flex2 > 860 && flex3 < 780 && flex4 > 870) {
+        return "Goodbye";
+    } else if (flex1 < 750 && flex2 < 760 && flex3 > 830 && flex4 > 850) {
+        return "Congratulations";
     } else {
         const gestures = 'abcdefghijklmnopqrstuvwxyz';
         const index = Math.floor((flex1 + flex2 + flex3 + flex4) / 160) % 26;
-        return `Letter: ${gestures[index]}`;
+        return Letter: ${gestures[index]};
     }
 }
 
-// API Endpoint for Gesture Recognition
-app.post("/gesture", async (req, res) => {
+// API Endpoint for Prediction
+app.post('/', async (req, res) => {
     try {
-        const { sensorData } = req.body;
-
-        if (!sensorData) {
+        if (!req.body || !req.body.sensorData) {
+            console.error("Invalid request: Missing sensorData object");
             return res.status(400).json({ error: "Missing sensorData object" });
         }
 
-        const { flex1, flex2, flex3, flex4 } = sensorData;
+        const { flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz } = req.body.sensorData;
 
-        if (
-            typeof flex1 !== "number" ||
-            typeof flex2 !== "number" ||
-            typeof flex3 !== "number" ||
-            typeof flex4 !== "number"
-        ) {
-            return res.status(400).json({ error: "Invalid input. All values must be numbers." });
+        // Input Validation
+        if ([flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz].some(value => value === undefined)) {
+            console.error("Invalid sensor data received");
+            return res.status(400).json({ error: "Missing or invalid sensor data" });
         }
 
+        // Map to Gesture
         const gesture = mapToGesture(flex1, flex2, flex3, flex4);
 
-        // Forward to Flask backend
-        const flaskURL = 'http://localhost:5000/data';
+        // Forward result to external website
+        const externalURL = 'http://127.0.0.1:5000';
+        const dataToSend = { gesture, ax, ay, az, gx, gy, gz };
 
         try {
-            await axios.post(flaskURL, { gesture }, {
+            await axios.post(externalURL, dataToSend, {
                 headers: { 'Content-Type': 'application/json' }
             });
-            console.log(`Gesture sent to Flask: ${gesture}`);
-        } catch (error) {
-            console.error("Error forwarding to Flask:", error.message);
+            console.log(Gesture and sensor data sent to external site: ${gesture});
+        } catch (axiosError) {
+            console.error("Failed to send data to external site:", axiosError.message);
         }
 
-        res.json({ gesture });
+        // Send response back to ESP32
+        res.send(gesture);
     } catch (error) {
-        console.error("Server Error:", error.message);
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error("Error:", error.message || error);
+        res.status(500).send("Internal Server Error");
     }
 });
 
-// Test Route
-app.get("/", (req, res) => {
-    res.send("Server is running. Use POST /gesture to send data.");
-});
-
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+// Start the Server
+const PORT = 5000;
+app.listen(PORT, () => {
+    console.log(Server is running on http://localhost:${PORT});
 });
