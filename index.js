@@ -17,7 +17,7 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
     } else if (flex1 < 810 && flex2 < 800 && flex3 > 850 && flex4 < 800) {
         return "Yes";
     } else if (flex1 < 810 && flex2 < 770 && flex3 < 850 && flex4 < 770) {
-        return "No";
+        return "Hello";
     } else if (flex1 > 850 && flex2 < 820 && flex3 > 870 && flex4 < 800) {
         return "Stop";
     } else if (flex1 < 800 && flex2 < 770 && flex3 < 850 && flex4 < 770) {
