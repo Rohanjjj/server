@@ -1,18 +1,12 @@
-const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 
 const app = express();
+const port = 3000;
+
+app.use(cors());
 app.use(express.json());
-app.use(cors()); // Enable CORS for all routes
 
-// Debugging Middleware
-app.use((req, res, next) => {
-    console.log("Received Body:", JSON.stringify(req.body));
-    next();
-});
-
-// Gesture Mapping Function
 function mapToGesture(flex1, flex2, flex3, flex4) {
     if (flex1 > 840 && flex2 > 810 && flex3 > 870 && flex4 > 815) {
         return "Hello";
@@ -53,48 +47,22 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
     }
 }
 
-// API Endpoint for Prediction
-app.post('/', async (req, res) => {
-    try {
-        if (!req.body || !req.body.sensorData) {
-            console.error("Invalid request: Missing sensorData object");
-            return res.status(400).json({ error: "Missing sensorData object" });
-        }
+app.post("/gesture", (req, res) => {
+    const { flex1, flex2, flex3, flex4 } = req.body;
 
-        const { flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz } = req.body.sensorData;
-
-        // Input Validation
-        if ([flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz].some(value => value === undefined)) {
-            console.error("Invalid sensor data received");
-            return res.status(400).json({ error: "Missing or invalid sensor data" });
-        }
-
-        // Map to Gesture
-        const gesture = mapToGesture(flex1, flex2, flex3, flex4);
-
-        // Forward result to external website
-        const externalURL = 'http://127.0.0.1:5000';
-        const dataToSend = { gesture, ax, ay, az, gx, gy, gz };
-
-        try {
-            await axios.post(externalURL, dataToSend, {
-                headers: { 'Content-Type': 'application/json' }
-            });
-            console.log(Gesture and sensor data sent to external site: ${gesture});
-        } catch (axiosError) {
-            console.error("Failed to send data to external site:", axiosError.message);
-        }
-
-        // Send response back to ESP32
-        res.send(gesture);
-    } catch (error) {
-        console.error("Error:", error.message || error);
-        res.status(500).send("Internal Server Error");
+    if (
+        typeof flex1 !== "number" ||
+        typeof flex2 !== "number" ||
+        typeof flex3 !== "number" ||
+        typeof flex4 !== "number"
+    ) {
+        return res.status(400).json({ error: "Invalid input. All values must be numbers." });
     }
+
+    const gesture = mapToGesture(flex1, flex2, flex3, flex4);
+    res.json({ gesture });
 });
 
-// Start the Server
-const PORT = 5000;
-app.listen(PORT, () => {
-    console.log(Server is running on http://localhost:${PORT});
+app.listen(port, () => {
+    console.log(Server running on port ${port});
 });
