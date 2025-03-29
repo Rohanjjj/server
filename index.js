@@ -43,7 +43,7 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
     } else {
         const gestures = 'abcdefghijklmnopqrstuvwxyz';
         const index = Math.floor((flex1 + flex2 + flex3 + flex4) / 160) % 26;
-        return Letter: ${gestures[index]};
+        return `Letter: ${gestures[index]}`; // Corrected Template Literal
     }
 }
 
@@ -64,5 +64,5 @@ app.post("/gesture", (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(Server running on port ${port});
+    console.log(`Server running on port ${port}`); // Corrected Template Literal
 });
