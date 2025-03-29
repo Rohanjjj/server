@@ -71,7 +71,7 @@ app.post('/', async (req, res) => {
         const gesture = mapToGesture(flex1, flex2, flex3, flex4);
 
         // Forward result to external website
-        const externalURL = 'https://vser.onrender.com';
+        const externalURL = 'http://127.0.0.1:5000';
         const dataToSend = { gesture, ax, ay, az, gx, gy, gz };
 
         try {
