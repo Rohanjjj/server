@@ -47,7 +47,7 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
     } else {
         const gestures = 'abcdefghijklmnopqrstuvwxyz';
         const index = Math.floor((flex1 + flex2 + flex3 + flex4) / 160) % 26;
-        return Letter: ${gestures[index]};
+        return `Letter: ${gestures[index]}`;
     }
 }
 
@@ -70,29 +70,29 @@ app.post('/', async (req, res) => {
         // Map to Gesture
         const gesture = mapToGesture(flex1, flex2, flex3, flex4);
 
-        // Forward result to external website
-        const externalURL = 'http://127.0.0.1:5000';
+        // Forward result to external website (Flask)
+        const externalURL = 'http://127.0.0.1:5000/data';
         const dataToSend = { gesture, ax, ay, az, gx, gy, gz };
 
         try {
             await axios.post(externalURL, dataToSend, {
                 headers: { 'Content-Type': 'application/json' }
             });
-            console.log(Gesture and sensor data sent to external site: ${gesture});
+            console.log(`Gesture and sensor data sent to external site: ${gesture}`);
         } catch (axiosError) {
             console.error("Failed to send data to external site:", axiosError.message);
         }
 
         // Send response back to ESP32
-        res.send(gesture);
+        res.json({ gesture });
     } catch (error) {
         console.error("Error:", error.message || error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
 // Start the Server
 const PORT = 5000;
 app.listen(PORT, () => {
-    console.log(Server is running on http://localhost:${PORT});
+    console.log(`Server is running on http://localhost:${PORT}`);
 });
