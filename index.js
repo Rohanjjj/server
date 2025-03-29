@@ -1,10 +1,12 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
+
 const app = express();
-
 app.use(express.json());
+app.use(cors()); // Enable CORS for all routes
 
-// Debugging Middleware to log received requests
+// Debugging Middleware
 app.use((req, res, next) => {
     console.log("Received Body:", JSON.stringify(req.body));
     next();
@@ -47,7 +49,7 @@ function mapToGesture(flex1, flex2, flex3, flex4) {
     } else {
         const gestures = 'abcdefghijklmnopqrstuvwxyz';
         const index = Math.floor((flex1 + flex2 + flex3 + flex4) / 160) % 26;
-        return `Letter: ${gestures[index]}`;
+        return Letter: ${gestures[index]};
     }
 }
 
@@ -78,7 +80,7 @@ app.post('/', async (req, res) => {
             await axios.post(externalURL, dataToSend, {
                 headers: { 'Content-Type': 'application/json' }
             });
-            console.log(`Gesture and sensor data sent to external site: ${gesture}`);
+            console.log(Gesture and sensor data sent to external site: ${gesture});
         } catch (axiosError) {
             console.error("Failed to send data to external site:", axiosError.message);
         }
@@ -94,5 +96,5 @@ app.post('/', async (req, res) => {
 // Start the Server
 const PORT = 5000;
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(Server is running on http://localhost:${PORT});
 });
