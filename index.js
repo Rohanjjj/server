@@ -18,7 +18,7 @@ app.post('/', async (req, res) => {
             return res.status(400).json({ error: "Missing sensorData object" });
         }
 
-        const externalURL = 'https://vser.onrender.com';
+        const externalURL = 'https://ml-new-vtfv.onrender.com';
         const dataToSend = req.body.sensorData;
 
         try {
