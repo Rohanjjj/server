@@ -8,7 +8,7 @@ const PORT = 3000;
 app.use(express.json());
 
 // Replace this with the external server URL
-const EXTERNAL_SERVER_URL = 'https://example.com/receive-data';
+const EXTERNAL_SERVER_URL = 'https://ml-new-vtfv.onrender.com';
 
 app.post('/sensor-data', async (req, res) => {
   const sensorData = req.body;
