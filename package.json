@@ -1,24 +1,22 @@
 {
-  "name": "gesture-audio-server",
+  "name": "websocket-server",
   "version": "1.0.0",
-  "description": "Express server for gesture recognition with audio output and interface",
-  "main": "index.js",
+  "description": "WebSocket server for communication between ESP32 and Python application",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js"
-  },
-  "dependencies": {
-    "axios": "^1.6.0",
-    "express": "^4.18.2",
-    "say": "^0.16.0"
+    "start": "node server.js"
   },
   "keywords": [
-    "gesture",
-    "sign-language",
-    "mpu6050",
-    "express",
-    "audio",
-    "interface"
+    "websocket",
+    "esp32",
+    "python",
+    "server",
+    "express"
   ],
   "author": "Your Name",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.13.0"
+  }
 }
