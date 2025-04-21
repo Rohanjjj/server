@@ -2,11 +2,9 @@ const express = require('express');
 const say = require('say');
 const path = require('path');
 const app = express();
-
 let lastGesture = 'Waiting for gesture...';
 
 app.use(express.json());
-
 // Serve static HTML UI
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -41,24 +39,33 @@ function mapToGesture(flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz) {
 
 app.post('/predict', async (req, res) => {
     try {
-        const { sensorData } = req.body;
-
-        if (!sensorData) {
+        console.log("Processing request body:", JSON.stringify(req.body));
+        
+        // Handle the double-nested sensorData structure
+        let sensorData;
+        if (req.body.sensorData && req.body.sensorData.sensorData) {
+            // Double nested case: {"sensorData":{"sensorData":{...}}}
+            sensorData = req.body.sensorData.sensorData;
+        } else if (req.body.sensorData) {
+            // Single nested case: {"sensorData":{...}}
+            sensorData = req.body.sensorData;
+        } else {
             return res.status(400).json({ error: "Missing sensorData object" });
         }
 
         const { flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz } = sensorData;
-
+        
         if ([flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz].some(val => val === undefined)) {
-            return res.status(400).json({ error: "Missing or invalid sensor data" });
+            return res.status(400).json({ 
+                error: "Missing or invalid sensor data",
+                received: sensorData
+            });
         }
-
+        
         const gesture = mapToGesture(flex1, flex2, flex3, flex4, ax, ay, az, gx, gy, gz);
         lastGesture = gesture;
-
         console.log(`Detected Gesture: ${gesture}`);
         say.speak(gesture);
-
         res.send(gesture);
     } catch (error) {
         console.error("Error:", error.message || error);
@@ -86,7 +93,6 @@ app.get('/', (req, res) => {
         <body>
             <h1>Detected Gesture:</h1>
             <div id="output">${lastGesture}</div>
-
             <script>
                 setInterval(async () => {
                     const res = await fetch('/gesture');
@@ -99,7 +105,7 @@ app.get('/', (req, res) => {
     `);
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
